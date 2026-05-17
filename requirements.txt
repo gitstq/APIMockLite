@@ -1,0 +1,11 @@
+# APIMockLite Dependencies
+# Core dependencies - kept minimal for zero-dependency philosophy
+
+# Optional YAML support (falls back to JSON if not installed)
+# PyYAML>=6.0
+
+# Optional development dependencies
+# pytest>=7.0
+# black
+# flake8
+# mypy

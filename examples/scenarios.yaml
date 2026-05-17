@@ -1,0 +1,246 @@
+# APIMockLite Scenarios Configuration Example
+# Demonstrates scenario-based mocking for testing different states
+
+server:
+  host: "127.0.0.1"
+  port: 8080
+  cors_enabled: true
+  ai_generation: true
+
+endpoints:
+  # Payment processing with multiple scenarios
+  - path: "/api/payments/process"
+    method: "POST"
+    status_code: 200
+    content_type: "application/json"
+    response:
+      success: true
+      transaction_id: "txn_123456789"
+      amount: 99.99
+      currency: "USD"
+      status: "completed"
+      message: "Payment processed successfully"
+      timestamp: "2025-05-17T12:00:00Z"
+    scenarios:
+      # Test insufficient funds scenario
+      insufficient_funds:
+        success: false
+        error: "insufficient_funds"
+        message: "Insufficient funds in account"
+        code: 400
+        timestamp: "2025-05-17T12:00:00Z"
+      
+      # Test card declined scenario
+      card_declined:
+        success: false
+        error: "card_declined"
+        message: "Card was declined by issuer"
+        code: 400
+        timestamp: "2025-05-17T12:00:00Z"
+      
+      # Test network error scenario
+      network_error:
+        success: false
+        error: "network_error"
+        message: "Unable to connect to payment gateway"
+        code: 503
+        timestamp: "2025-05-17T12:00:00Z"
+      
+      # Test timeout scenario
+      timeout:
+        success: false
+        error: "timeout"
+        message: "Payment processing timed out"
+        code: 504
+        timestamp: "2025-05-17T12:00:00Z"
+
+  # User profile with different user states
+  - path: "/api/users/profile"
+    method: "GET"
+    status_code: 200
+    content_type: "application/json"
+    response:
+      id: "user_001"
+      name: "Active User"
+      email: "active@example.com"
+      status: "active"
+      subscription: "premium"
+      features:
+        - "feature_a"
+        - "feature_b"
+        - "feature_c"
+    scenarios:
+      # Free tier user
+      free_tier:
+        id: "user_002"
+        name: "Free User"
+        email: "free@example.com"
+        status: "active"
+        subscription: "free"
+        features:
+          - "feature_a"
+      
+      # Suspended user
+      suspended:
+        id: "user_003"
+        name: "Suspended User"
+        email: "suspended@example.com"
+        status: "suspended"
+        subscription: "premium"
+        suspension_reason: "Payment overdue"
+        suspension_date: "2025-05-01T00:00:00Z"
+        features: []
+      
+      # Pending verification user
+      pending_verification:
+        id: "user_004"
+        name: "Pending User"
+        email: "pending@example.com"
+        status: "pending_verification"
+        subscription: "free"
+        verification_sent: "2025-05-16T10:00:00Z"
+        features: []
+
+  # Inventory endpoint with stock scenarios
+  - path: "/api/inventory/:product_id"
+    method: "GET"
+    status_code: 200
+    content_type: "application/json"
+    response:
+      product_id: "prod_001"
+      name: "Popular Item"
+      stock: 100
+      reserved: 10
+      available: 90
+      status: "in_stock"
+      restock_date: null
+    scenarios:
+      # Low stock scenario
+      low_stock:
+        product_id: "prod_001"
+        name: "Popular Item"
+        stock: 5
+        reserved: 3
+        available: 2
+        status: "low_stock"
+        restock_date: "2025-05-20T00:00:00Z"
+      
+      # Out of stock scenario
+      out_of_stock:
+        product_id: "prod_001"
+        name: "Popular Item"
+        stock: 0
+        reserved: 0
+        available: 0
+        status: "out_of_stock"
+        restock_date: "2025-05-25T00:00:00Z"
+      
+      # Discontinued scenario
+      discontinued:
+        product_id: "prod_001"
+        name: "Popular Item"
+        stock: 0
+        reserved: 0
+        available: 0
+        status: "discontinued"
+        restock_date: null
+        replacement_product: "prod_002"
+
+  # Shipping rates with location-based scenarios
+  - path: "/api/shipping/rates"
+    method: "POST"
+    status_code: 200
+    content_type: "application/json"
+    response:
+      destination: "US"
+      options:
+        - method: "standard"
+          cost: 5.99
+          estimated_days: "5-7"
+          carrier: "UPS"
+        - method: "express"
+          cost: 15.99
+          estimated_days: "2-3"
+          carrier: "FedEx"
+        - method: "overnight"
+          cost: 29.99
+          estimated_days: "1"
+          carrier: "FedEx"
+    scenarios:
+      # International shipping
+      international:
+        destination: "EU"
+        options:
+          - method: "standard"
+            cost: 15.99
+            estimated_days: "10-14"
+            carrier: "DHL"
+          - method: "express"
+            cost: 35.99
+            estimated_days: "5-7"
+            carrier: "DHL"
+      
+      # Remote area shipping
+      remote_area:
+        destination: "Remote"
+        options:
+          - method: "standard"
+            cost: 12.99
+            estimated_days: "10-14"
+            carrier: "USPS"
+        warning: "Limited shipping options for remote areas"
+      
+      # No shipping available
+      no_shipping:
+        destination: "Restricted"
+        options: []
+        error: "Shipping not available to this destination"
+        code: 400
+
+  # API rate limit scenarios
+  - path: "/api/data"
+    method: "GET"
+    status_code: 200
+    content_type: "application/json"
+    response:
+      data: "Some important data"
+      rate_limit:
+        limit: 1000
+        remaining: 999
+        reset_at: "2025-05-17T13:00:00Z"
+    scenarios:
+      # Rate limit approaching
+      rate_limit_warning:
+        data: "Some important data"
+        rate_limit:
+          limit: 1000
+          remaining: 10
+          reset_at: "2025-05-17T13:00:00Z"
+        warning: "Rate limit almost reached"
+      
+      # Rate limit exceeded
+      rate_limit_exceeded:
+        error: "Rate limit exceeded"
+        message: "You have exceeded the API rate limit"
+        retry_after: 3600
+        rate_limit:
+          limit: 1000
+          remaining: 0
+          reset_at: "2025-05-17T13:00:00Z"
+
+# Usage examples with curl:
+#
+# 1. Default response (success):
+#    curl http://localhost:8080/api/payments/process -X POST
+#
+# 2. Insufficient funds scenario:
+#    curl http://localhost:8080/api/payments/process -X POST -H "X-Scenario: insufficient_funds"
+#
+# 3. Card declined scenario:
+#    curl http://localhost:8080/api/payments/process -X POST -H "X-Scenario: card_declined"
+#
+# 4. Free tier user profile:
+#    curl http://localhost:8080/api/users/profile -H "X-Scenario: free_tier"
+#
+# 5. Low stock inventory:
+#    curl http://localhost:8080/api/inventory/prod_001 -H "X-Scenario: low_stock"

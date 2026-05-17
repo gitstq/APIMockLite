@@ -1,0 +1,237 @@
+# APIMockLite Basic Configuration Example
+# This is a sample configuration file demonstrating various features
+
+server:
+  host: "127.0.0.1"
+  port: 8080
+  cors_enabled: true
+  cors_origins:
+    - "*"
+  log_level: "INFO"
+  record_requests: true
+  recording_dir: "./recordings"
+  ai_generation: true
+
+endpoints:
+  # Health check endpoint
+  - path: "/api/health"
+    method: "GET"
+    status_code: 200
+    content_type: "application/json"
+    response:
+      status: "healthy"
+      timestamp: "2025-01-01T00:00:00Z"
+      version: "1.0.0"
+      uptime: "99.9%"
+
+  # Users list endpoint
+  - path: "/api/users"
+    method: "GET"
+    status_code: 200
+    content_type: "application/json"
+    response:
+      data:
+        - id: "user_001"
+          name: "John Doe"
+          email: "john.doe@example.com"
+          role: "admin"
+          status: "active"
+          created_at: "2025-01-15T10:30:00Z"
+        - id: "user_002"
+          name: "Jane Smith"
+          email: "jane.smith@example.com"
+          role: "user"
+          status: "active"
+          created_at: "2025-02-20T14:45:00Z"
+        - id: "user_003"
+          name: "Bob Johnson"
+          email: "bob.johnson@example.com"
+          role: "editor"
+          status: "inactive"
+          created_at: "2025-03-10T09:15:00Z"
+      pagination:
+        page: 1
+        per_page: 10
+        total: 3
+        total_pages: 1
+    scenarios:
+      empty:
+        data: []
+        pagination:
+          page: 1
+          per_page: 10
+          total: 0
+          total_pages: 0
+      error:
+        error: "Failed to fetch users"
+        code: 500
+
+  # Create user endpoint
+  - path: "/api/users"
+    method: "POST"
+    status_code: 201
+    content_type: "application/json"
+    response:
+      id: "user_new"
+      name: "New User"
+      email: "newuser@example.com"
+      role: "user"
+      status: "active"
+      created_at: "2025-05-17T12:00:00Z"
+      message: "User created successfully"
+
+  # Get single user endpoint
+  - path: "/api/users/:id"
+    method: "GET"
+    status_code: 200
+    content_type: "application/json"
+    response:
+      id: "user_001"
+      name: "John Doe"
+      email: "john.doe@example.com"
+      role: "admin"
+      status: "active"
+      created_at: "2025-01-15T10:30:00Z"
+      profile:
+        avatar: "https://api.dicebear.com/7.x/avataaars/svg?seed=john"
+        bio: "Software Engineer"
+        location: "San Francisco, CA"
+        website: "https://johndoe.dev"
+    scenarios:
+      not_found:
+        error: "User not found"
+        code: 404
+        message: "The requested user does not exist"
+
+  # Update user endpoint
+  - path: "/api/users/:id"
+    method: "PUT"
+    status_code: 200
+    content_type: "application/json"
+    response:
+      id: "user_001"
+      name: "John Doe Updated"
+      email: "john.doe@example.com"
+      role: "admin"
+      status: "active"
+      updated_at: "2025-05-17T12:30:00Z"
+      message: "User updated successfully"
+
+  # Delete user endpoint
+  - path: "/api/users/:id"
+    method: "DELETE"
+    status_code: 200
+    content_type: "application/json"
+    response:
+      message: "User deleted successfully"
+      deleted_at: "2025-05-17T12:35:00Z"
+
+  # Products list endpoint
+  - path: "/api/products"
+    method: "GET"
+    status_code: 200
+    content_type: "application/json"
+    response:
+      data:
+        - id: "prod_001"
+          name: "Premium Widget"
+          description: "A high-quality widget for all your needs"
+          price: 29.99
+          category: "electronics"
+          stock: 150
+          sku: "WDG-001"
+          status: "active"
+        - id: "prod_002"
+          name: "Super Gadget"
+          description: "The ultimate gadget for tech enthusiasts"
+          price: 99.99
+          category: "electronics"
+          stock: 75
+          sku: "GTG-002"
+          status: "active"
+        - id: "prod_003"
+          name: "Basic Tool"
+          description: "Essential tool for everyday tasks"
+          price: 9.99
+          category: "tools"
+          stock: 0
+          sku: "TL-003"
+          status: "out_of_stock"
+
+  # Orders endpoint with delay simulation
+  - path: "/api/orders"
+    method: "GET"
+    status_code: 200
+    content_type: "application/json"
+    delay: 0.5  # Simulate 500ms delay
+    response:
+      data:
+        - id: "ord_001"
+          user_id: "user_001"
+          items:
+            - product_id: "prod_001"
+              name: "Premium Widget"
+              quantity: 2
+              price: 29.99
+          total: 59.98
+          status: "delivered"
+          created_at: "2025-05-10T08:00:00Z"
+        - id: "ord_002"
+          user_id: "user_002"
+          items:
+            - product_id: "prod_002"
+              name: "Super Gadget"
+              quantity: 1
+              price: 99.99
+          total: 99.99
+          status: "processing"
+          created_at: "2025-05-15T14:30:00Z"
+
+  # Authentication endpoint
+  - path: "/api/auth/login"
+    method: "POST"
+    status_code: 200
+    content_type: "application/json"
+    response:
+      success: true
+      token: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
+      refresh_token: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
+      expires_in: 3600
+      user:
+        id: "user_001"
+        name: "John Doe"
+        email: "john.doe@example.com"
+        role: "admin"
+    scenarios:
+      invalid_credentials:
+        success: false
+        error: "Invalid email or password"
+        code: 401
+      account_locked:
+        success: false
+        error: "Account has been locked"
+        code: 403
+
+  # Search endpoint
+  - path: "/api/search"
+    method: "GET"
+    status_code: 200
+    content_type: "application/json"
+    response:
+      query: "example"
+      results:
+        - type: "user"
+          id: "user_001"
+          name: "John Doe"
+          match_score: 0.95
+        - type: "product"
+          id: "prod_001"
+          name: "Premium Widget"
+          match_score: 0.87
+      total_results: 2
+      search_time_ms: 45
+
+global_headers:
+  X-API-Version: "1.0.0"
+  X-Mock-Server: "APIMockLite"
+  X-Request-ID: "mock-request"
